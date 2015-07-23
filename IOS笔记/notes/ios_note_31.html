@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>IOS UI布局</title>
+        <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+            <meta name="format-detection" content="telephone=no">
+                <link rel="stylesheet" type="text/css" href="rule.css">
+                   
+                    
+    </head>
+    <body>
+        <div>
+            <section id="wrapper">
+                
+                <article id="scroller">
+                    <dl class="note-summary">iOS动态布局</dl>
+                    
+                    
+                    <dl name="3101" id="3101" class="dlTit"><li>AutoResizing</li><dd></dd></dl>
+                    <div>
+                        AutoResizing:
+                        
+                    </div>
+                    <div class="oc-code">
+                        <code>
+                            
+                            
+                        </code>
+                    </div>
+                    
+                    <dl class="dlTit"><li>AutoLayout</li><dd></dd></dl>
+                    <div>
+                        AutoLayout:比AutoResizing更强大的布局方式。<br/>
+                        核心思想是：<red>参照</red>和<red>约束</red>。<br/>
+                        constraints（约束）:<red>align（对齐方式）</red>、<red>pin（间距）</red>
+                        
+                    </div>
+                    <div class="oc-code" id="3201" name="3201">
+                        <dl>例1：①长度200X200 ②父控件中居中</dl>
+                        <code>
+                            //长度200X200 居中<br/>
+                            UIView *center =[[UIView alloc]init];<br/>
+                            center.backgroundColor=[UIColor orangeColor];<br/>
+                            [self.view addSubview:center];<br/>
+                            //禁用AutoResizing<br/>
+                            center.translatesAutoresizingMaskIntoConstraints=NO;<br/>
+                            <br/>
+                            //高度约束<br/>
+                            NSLayoutConstraint *heightConstrain=[NSLayoutConstraint constraintWithItem:center <br/>attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil <br/>attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:200];<br/>
+                            
+                            [center addConstraint:heightConstrain];<br/>
+                            //宽度约束
+                            NSLayoutConstraint *widthConstrain=[NSLayoutConstraint constraintWithItem:center <br/>attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil <br/>attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:200];<br/>
+                            [center addConstraint:widthConstrain];<br/>
+                            <br/>
+                            //位置中心点x约束
+                            NSLayoutConstraint *xConstrain=[NSLayoutConstraint constraintWithItem:center <br/>attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view <br/>attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0];<br/>
+                            [self.view addConstraint:xConstrain];<br/>
+                            <br/>
+                            //位置中心点x约束<br/>
+                            NSLayoutConstraint *yConstrain=[NSLayoutConstraint constraintWithItem:center <br/>attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.view <br/>attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0];<br/>
+                            [self.view addConstraint:yConstrain];<br/>
+                            
+                        </code>
+                        Figure1.
+                        <div class="oc-anno" style="width:200px;height:300px;background:white;text-align:center;vertical-align:middle;display:table-cell; ">
+                            <div style="width:100px;height:100px;background:orange;margin:auto;">
+                                
+                                </div>
+                            
+                        </div>
+                        
+                        
+                        <dl>例2：模仿经典电量图标<br/>
+                            ①从1-5 信号高度依次为 H~5H （H＝10）<br/>
+                            ②单个信号宽度为1.5H,间距为0.5H<br/>
+                            ③始终父控件中居左居顶2H高度<br/></dl>
+                        <code>
+                            <div class="oc-anno">
+                             <b>方法1：</b>
+                             -(void)signal1
+                             {<br/>
+                             //依次创建5个信号View<br/>
+                             static int count = 5;<br/>
+                             static int H = 10;<br/>
+                             static int W = 15;<br/>
+                             int marginLeft=10;<br/>
+                             static int gap=5;<br/>
+                             NSMutableArray *signals=[NSMutableArray array];<br/>
+                             for(int i=0;i<count;i++)<br/>
+                                 {<br/>
+                                 UIView *center =[[UIView alloc]init];<br/>
+                                 center.backgroundColor=[UIColor blackColor];<br/>
+                                 center.translatesAutoresizingMaskIntoConstraints=NO;<br/>
+                                 [self.view addSubview:center];<br/>
+                                 [signals addObject:center];<br/>
+                                 <br/>
+                                 //高度约束<br/>
+                                 NSLayoutConstraint *heightConstrain=[NSLayoutConstraint constraintWithItem:<br/>center attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual <br/>toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 <br/>constant:H*(i+1)];<br/>
+                                 
+                                 [center addConstraint:heightConstrain];<br/>
+                                 //宽度约束<br/>
+                                 NSLayoutConstraint *widthConstrain=[NSLayoutConstraint constraintWithItem:<br/>center attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual <br/>toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 <br/>constant:W];<br/>
+                                 [center addConstraint:widthConstrain];<br/>
+                                 <div class="content-diff">
+                                 NSLayoutConstraint *marginX=[NSLayoutConstraint constraintWithItem:center <br/>attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual <br/>toItem:self.view attribute:NSLayoutAttributeLeading multiplier:1.0 <br/>constant:marginLeft+i*W+i*gap];<br/>
+                                 [self.view addConstraint:marginX];<br/>
+                                 
+                                 //顶部
+                                 NSLayoutConstraint *marginT=[NSLayoutConstraint constraintWithItem:center <br/>attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeTop multiplier:1.0 constant:5*H-i*H+marginLeft];<br/>
+                                 [self.view addConstraint:marginT];<br/>
+                                 </div>
+                                 }<br/>
+                            }<br/>
+                            </div>
+                            <div class="oc-anno">
+                             <b>方法2：</b>
+                             
+                             -(void)singnal2<br/>
+                             {<br/>
+                             //模仿经典电量图标<br/>
+                             //    ①从1-5 信号高度依次为 H~5H<br/>
+                             //    ②单个信号宽度为1.5H,间距为0.5H<br/>
+                             //    ③始终父控件中居左居顶<br/>
+                             
+                             //依次创建5个信号View<br/>
+                             static int count = 5;<br/>
+                             static int H = 10;<br/>
+                             static int W = 15;<br/>
+                             int marginLeft=10;<br/>
+                             static int gap=5;<br/>
+                             NSMutableArray *signals=[NSMutableArray array];<br/>
+                             UIView *lastView=nil;<br/>
+                             for(int i=0;i<count;i++)<br/>
+                                 {<br/>
+                                 UIView *center =[[UIView alloc]init];<br/>
+                                 center.backgroundColor=[UIColor blackColor];<br/>
+                                 center.translatesAutoresizingMaskIntoConstraints=NO;<br/>
+                                 [self.view addSubview:center];<br/>
+                                 [signals addObject:center];<br/>
+                                 
+                                 //高度约束
+                                 NSLayoutConstraint *heightConstrain=[NSLayoutConstraint constraintWithItem:center attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:H*(i+1)];<br/>
+                                 
+                                 [center addConstraint:heightConstrain];<br/>
+                                 //宽度约束<br/>
+                                 NSLayoutConstraint *widthConstrain=[NSLayoutConstraint constraintWithItem:center attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:W];<br/>
+                                 [center addConstraint:widthConstrain];<br/>
+                                 
+                                 <div class="content-diff">
+                                 if (lastView==nil) {<br/>
+                                 //第一个信号<br/>
+                                 //左侧的margin<br/>
+                                 NSLayoutConstraint *marginX=[NSLayoutConstraint constraintWithItem:center attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeLeading multiplier:1.0 constant:marginLeft];<br/>
+                                 [self.view addConstraint:marginX];<br/>
+                                 
+                                 //顶部<br/>
+                                 NSLayoutConstraint *marginT=[NSLayoutConstraint constraintWithItem:center attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeTop multiplier:1.0 constant:7*H];
+                                 [self.view addConstraint:marginT];<br/>
+                                 
+                                 }else<br/>
+                                 {<br/>
+                                 //同时底部对齐<br/>
+                                 NSLayoutConstraint *alignB=[NSLayoutConstraint constraintWithItem:center attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:lastView attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0];<br/>
+                                 [self.view addConstraint:alignB];<br/>
+                                 
+                                 //顶部<br/>
+                                 NSLayoutConstraint *marginR=[NSLayoutConstraint constraintWithItem:center attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:<br/>lastView attribute:NSLayoutAttributeRight multiplier:1.0 constant:gap];<br/>
+                                 [self.view  addConstraint:marginR];<br/>
+                                 
+                                 }<br/>
+                                 
+                                 
+                                 lastView=center;<br/>
+                                 </div>
+                                 }<br/>
+                                 }<br/>
+
+                             
+                             
+                            </div>
+                        </code>
+                        Figure1.
+                        <div class="oc-anno" style="width:200px;height:300px;background:white;text-align:center;vertical-align:middle;display:table-cell; ">
+                            <div  >
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </article>
+            </section>
+        </div>
+        <footer>整理by freddon QQ:419102565</footer>
+         <script type="text/javascript" src="jquery.js"></script>
+          <script type="text/javascript" src="common.js"></script>
+    </body>
+    
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>异步/网络</title>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="format-detection" content="telephone=no">
+    <script type="text/javascript" src="jquery.js" />
+<script type="text/javascript">
+    var g=function(id)
+    {
+        return document.getElementById(id);
+    }
+ var html=function()
+ {
+     return document.body.html;
+ }
+</script>
+<link rel="stylesheet" type="text/css" href="rule.css">
+</head>
+<body>
+<div>
+	<section id="wrapper">
+        
+		<article id="scroller">
+            <dl class="note-summary">Grand Central Dispatch (GCD)是Apple开发的一个多核编程的解决方法</dl>
+			<dl name="1101" id="1101" class="dlTit"><li>GCD运行在UI线程</li><dd></dd></dl>
+			<div class="oc-code">
+<code>
+代码:<br/>
+dispatch_async(dispatch_get_main_queue(), ^{
+});
+</code>
+			</div>
+            
+            <dl name="1102" id="1102" class="dlTit"><li>GCD运行在后台线程</li><dd></dd></dl>
+            <div class="oc-code">
+<code>
+代码:<br/>
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+
+});
+</code>
+            </div>
+            
+            <dl name="1103" id="1103" class="dlTit"><li>GCD一次性执行</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    <p class="annex-desc">不仅意味着代码仅会被运行一次，而且还是线程安全的，这就意味着你不需要使用诸如@synchronized之类的来防止使用多个线程或者队列时不同步的问题。</p>
+                    代码:<br/>
+                    static dispatch_once_t onceToken;
+                    dispatch_once(&onceToken, ^{
+                    
+                    });
+                </code>
+            </div>
+            
+            <dl name="1104" id="1104" class="dlTit"><li>GCD延迟执行</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    代码:<br/>
+                    // 延迟2秒执行：<br/>
+                    double delayInSeconds = 2.0;
+                    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+                    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                    
+                    });
+                </code>
+            </div>
+            
+            <dl name="1105" id="1105" class="dlTit"><li>GCD合并执行</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    代码:<br/>
+                    // 合并汇总结果<br/>
+                    dispatch_group_t group = dispatch_group_create();<br/>
+                    dispatch_group_async(group, dispatch_get_global_queue(0,0), ^{<br/>
+                    // 并行执行的线程一<br/>
+                    });<br/>
+                    dispatch_group_async(group, dispatch_get_global_queue(0,0), ^{<br/>
+                    // 并行执行的线程二<br/>
+                    });<br/>
+                    dispatch_group_notify(group, dispatch_get_global_queue(0,0), ^{<br/>
+                    // 汇总结果<br/>
+                    });<br/>
+                </code>
+            </div>
+            
+            <dl name="1106" id="1106" class="dlTit"><li>GCD同步与异步</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    代码:<br/>
+                    // 创建一个串行queue<br/>
+                    ////第二个参数为Null 创建Serial dispatch queue（串行）; 如果为DISPATCH_QUEUE_CONCURRENT 则创建的是Concurrent queue（并行）;<br/>
+                    ////串行：每通过dispatch_queue_create 执行一次就创建一个Serial Dispatch Queue<br/>
+                    ////并行：通过dispatch_queue_create 可以创建有限个Concurrent Dispatch Queue<br/>
+                    dispatch_queue_t queue = dispatch_queue_create("应用名称ID的倒序+queue名字", NULL);<br/>
+                    ////
+                    dispatch_async(queue, ^{<br/>
+                    NSLog(@"开启一个异步任务，当前线程：%@", [NSThread currentThread]);<br/>
+                    });<br/>
+                    <br/>
+                    ////会阻塞在当前调用此任务的线程<br/>
+                    dispatch_sync(queue, ^{<br/>
+                    NSLog(@"开启一个同步任务，当前线程：%@", [NSThread currentThread]);<br/>
+                    });<br/>
+                    // 销毁队列<br/>
+                    dispatch_release(queue);<br/>
+                </code>
+            </div>
+            
+            <dl name="1180" id="1180" class="dlTit"><li>GCD使用事例1：网络连接</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    代码:<br/>
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{<br/>
+                        NSURL * url = [NSURL URLWithString:@"https://www.baidu.com/"];<br/>
+                        NSError * error;<br/>
+                        NSString * data = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&error];<br/>
+                        if (data != nil) {<br/>
+                            dispatch_async(dispatch_get_main_queue(), ^{<br/>
+                                NSLog(@"call back, the data is: %@", data);<br/>
+                                    });<br/>
+                        } else {<br/>
+                            NSLog(@"error when connect:%@", error);<br/>
+                        }<br/>
+                    });<br/>
+                </code>
+            </div>
+            
+            <dl name="1181" id="1181" class="dlTit"><li>GCD使用事例2：后台较长久的运行</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    代码:<br/>
+                    // AppDelegate.h文件<br/>
+                    @property (assign, nonatomic) UIBackgroundTaskIdentifier backgroundUpdateTask;<br/>
+                    
+                    // AppDelegate.m文件<br/>
+                    - (void)applicationDidEnterBackground:(UIApplication *)application<br/>
+                    {<br/>
+                    [self beingBackgroundUpdateTask];<br/>
+                    // 在这里加上你需要长久运行的代码<br/>
+                    [self endBackgroundUpdateTask];<br/>
+                    }<br/>
+                    
+                    - (void)beingBackgroundUpdateTask<br/>
+                    {<br/>
+                    self.backgroundUpdateTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{<br/>
+                    [self endBackgroundUpdateTask];<br/>
+                    }];<br/>
+                    }<br/>
+                    
+                    - (void)endBackgroundUpdateTask<br/>
+                    {<br/>
+                    [[UIApplication sharedApplication] endBackgroundTask: self.backgroundUpdateTask];<br/>
+                    self.backgroundUpdateTask = UIBackgroundTaskInvalid;<br/>
+                    }<br/>
+                </code>
+            </div>
+            
+            <dl name="1182" id="1182" class="dlTit"><li>GCD使用事例3：迭代执行任务</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    代码:<br/>
+                    // 获得全局并发queue<br/>
+                    ////如果是串行将会以队列形式阻塞当前线程<br/>
+                    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);<br/>
+                    size_t count = 10;<br/>
+                    ////和普通for循环一样,dispatch_apply和dispatch_apply_f函数也是在所有迭代完成之后才会返回，因此这两个函数会阻塞当前线程<br/>
+                    dispatch_apply(count, queue, ^(size_t i) {<br/>
+                        //任务<br/>
+                    });<br/>
+                </code>
+            </div>
+            
+		</article>
+	</section>
+</div>
+<footer>整理by freddon QQ:419102565</footer>
+</body>
+
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NSOperation</title>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="format-detection" content="telephone=no">
+<link rel="stylesheet" type="text/css" href="rule.css">
+</head>
+<body>
+<div>
+	<section id="wrapper">
+        
+		<article id="scroller">
+            <dl class="note-summary">iOS开发网络NSURLConnection<span class="span-spec"><a href="#AFNetworking">推荐使用AFNetworking框架</a></span></dl>
+			
+            
+            <dl name="1200" id="1200" class="dlTit"><li>基本使用</li><dd></dd></dl>
+            <div >
+                <code>
+                    一、NSURLConnection的常用类<br/>
+                    
+                    （1）NSURL：请求地址<br/>
+                    
+                    （2）NSURLRequest：封装一个请求，保存发给服务器的全部数据，包括一个NSURL对象，请求方法、请求头、请求体....<br/>
+                    
+                    （3）NSMutableURLRequest：NSURLRequest的子类<br/>
+                    
+                    （4）NSURLConnection：负责发送请求，建立客户端和服务器的连接。发送NSURLRequest的数据给服务器，并收集来自服务器的响应数据<br/>
+                    
+                    二、NSURLConnection的使用<br/>
+                    1.简单说明<br/>
+                    使用NSURLConnection发送请求的步骤很简单<br/>
+                    
+                    （1）创建一个NSURL对象，设置请求路径（设置请求路径）<br/>
+                    
+                    （2）传入NSURL创建一个NSURLRequest对象，设置请求头和请求体（创建请求对象）<br/>
+                    
+                    （3）使用NSURLConnection发送NSURLRequest（发送请求）<br/>
+                    
+                </code>
+            </div>
+            <div class="oc-code">
+                <code>
+                    //【A1】1.设置请求路径<br/>
+                    NSString *urlStr=[NSString stringWithFormat:@"https://m.baidu.com/s?k=%@",@"freddon"];<br/>
+                    NSURL *url=[NSURL URLWithString:urlStr];<br/>
+                    //    2.创建请求对象<br/>
+                    NSURLRequest *request=[NSURLRequest requestWithURL:url];<br/>
+                    //    3.发送请求<br/>
+                    //发送同步请求，在主线程执行<br/>
+                    NSData *data=[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];<br/>
+                    //（一直在等待服务器返回数据，这行代码会卡住，如果服务器没有返回数据，那么在主线程UI会卡住不能继续执行操作）<br/>
+                    
+                </code>
+            </div>
+            <div class="oc-code">
+                <code>
+                    //【A2】通过实现代理<br/>
+                    NSString *urlStr=[NSString stringWithFormat:@"http://www.baidu.com/"];<br/>
+                    urlStr= [urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];<br/>
+                    NSURL *nsurl=[NSURL URLWithString:urlStr];<br/>
+                    ////带策略的NSURLRequest<br/>
+                    ////[NSURLRequest requestWithURL:(NSURL *) cachePolicy:(NSURLRequestCachePolicy) timeoutInterval:(NSTimeInterval)]<br/>
+                    NSURLRequest *request=[NSURLRequest requestWithURL:nsurl];<br/>
+                    NSURLConnection* con=[NSURLConnection connectionWithRequest:request delegate:delegate];<br/>
+                    [con start];<br/>
+                </code>
+            </div>
+            
+            <dl name="1201" id="1201" class="dlTit"><li>GET/POST</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    NSURLRequest *request=[NSURLRequest requestWithURL:nsurl];<br/>
+                    //POST必须，GET默认或设置HTTPMethod＝@"GET"<br/>
+                    request.HTTPMethod=@"POST";<br/>
+                    //POST可携带实体 NSData*<br/>
+                    request.HTTPBody=body;<br/>
+                </code>
+            </div>
+            
+            <dl name="1202" id="1202" class="dlTit"><li>URL - fileupload</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    
+                    
+                </code>
+            </div>
+            
+            <dl name="1203" id="1203" class="dlTit"><li>URL - download</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    
+                    
+                </code>
+            </div>
+            
+            <dl name="1204" id="1204" class="dlTit"><li>URL - PUT/HEAD/DELETE</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    
+                    
+                </code>
+            </div>
+            
+		</article>
+        
+        <article class="scroller">
+            <dl name="AFNetworking" id="AFNetworking" class="note-summary">iOS开发网络框架 AFNetworking</a></span></dl>
+            
+            
+            <dl name="1220" id="1220" class="dlTit"><li>GET</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];<br/>
+                    [manager GET:@"http://example.com/resources.json" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {<br/>
+                        NSLog(@"JSON: %@", responseObject);<br/>
+                    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {<br/>
+                    NSLog(@"Error: %@", error);<br/>
+                    }];<br/>
+                    
+                </code>
+               <dl class="dlTit"><li>或使用AFHTTPRequestOperation</li><dd></dd></dl>
+                <div class="oc-code">
+                    NSURL *URL = [NSURL URLWithString:@"http://example.com/resources/123.json"];<br/>
+                    NSURLRequest *request = [NSURLRequest requestWithURL:URL];<br/>
+                    AFHTTPRequestOperation *op = [[AFHTTPRequestOperation alloc] initWithRequest:request];<br/>
+                    op.responseSerializer = [AFJSONResponseSerializer serializer];<br/>
+                    [op setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {<br/>
+                    NSLog(@"JSON: %@", responseObject);<br/>
+                    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {<br/>
+                    NSLog(@"Error: %@", error);<br/>
+                    }];<br/>
+                    [[NSOperationQueue mainQueue] addOperation:op];<br/>
+                </div>
+            </div>
+            
+            <dl name="1221" id="1221" class="dlTit"><li>POST</li><dd></dd></dl>
+            <div class="oc-code">
+                <dl>URL-Form-Encoded Request</dl>
+                <code>
+                    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];<br/>
+                    NSDictionary *parameters = @{@"foo": @"bar"};<br/>
+                    [manager POST:@"http://example.com/resources.json" parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {<br/>
+                    NSLog(@"JSON: %@", responseObject);<br/>
+                    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {<br/>
+                    NSLog(@"Error: %@", error);<br/>
+                    }];<br/>
+                </code>
+            </div>
+            <div class="oc-code">
+                <dl>Multi-Part Request</dl>
+                <code>
+                    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];<br/>
+                    NSDictionary *parameters = @{@"foo": @"bar"};<br/>
+                    NSURL *filePath = [NSURL fileURLWithPath:@"file://path/to/image.png"];<br/>
+                    [manager POST:@"http://example.com/resources.json" parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {<br/>
+                        [formData appendPartWithFileURL:filePath name:@"image" error:nil];<br/>
+                        } success:^(AFHTTPRequestOperation *operation, id responseObject) {<br/>
+                        NSLog(@"Success: %@", responseObject);<br/>
+                        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {<br/>
+                        NSLog(@"Error: %@", error);<br/>
+                        }];<br/>
+                        </code>
+            </div>
+            <dl name="1222" id="1222" class="dlTit"><li>download</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];<br/>
+                    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];<br/>
+                    
+                    NSURL *URL = [NSURL URLWithString:@"http://example.com/download.zip"];<br/>
+                    NSURLRequest *request = [NSURLRequest requestWithURL:URL];<br/>
+                    
+                    NSURLSessionDownloadTask *downloadTask = [manager downloadTaskWithRequest:request progress:nil destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {<br/>
+                    NSURL *documentsDirectoryURL = [[NSFileManager defaultManager] <br/>URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];<br/>
+                    return [documentsDirectoryURL URLByAppendingPathComponent:[response suggestedFilename]];<br/>
+                    } completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {<br/>
+                    NSLog(@"File downloaded to: %@", filePath);<br/>
+                    }];<br/>
+                    [downloadTask resume];<br/>
+                </code>
+            </div>
+            <dl name="1223" id="1223" class="dlTit"><li>upload</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];<br/>
+                    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];<br/>
+                    NSURL *URL = [NSURL URLWithString:@"http://example.com/upload"];<br/>
+                    NSURLRequest *request = [NSURLRequest requestWithURL:URL];<br/>
+                    <br/>
+                    NSURL *filePath = [NSURL fileURLWithPath:@"file://path/to/image.png"];<br/>
+                    NSURLSessionUploadTask *uploadTask = [manager uploadTaskWithRequest:request fromFile:filePath progress:nil completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {<br/>
+                    if (error) {<br/>
+                    NSLog(@"Error: %@", error);<br/>
+                    } else {<br/>
+                    NSLog(@"Success: %@ %@", response, responseObject);<br/>
+                    }<br/>
+                    }];<br/>
+                    [uploadTask resume];<br/>
+                </code>
+                <div class="oc-code">
+                    <dl>Creating an Upload Task for a Multi-Part Request, with Progress</dl>
+                    <code>
+                    NSMutableURLRequest *request = [[AFHTTPRequestSerializer serializer] multipartFormRequestWithMethod:@"POST" URLString:@"http://example.com/upload" parameters:nil constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {<br/>
+                        [formData appendPartWithFileURL:[NSURL fileURLWithPath:@"file://path/to/image.jpg"] name:@"file" fileName:@"filename.jpg" mimeType:@"image/jpeg" error:nil];<br/>
+                        } error:nil];<br/>
+                        
+                        AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];<br/>
+                        NSProgress *progress = nil;<br/>
+                        
+                        NSURLSessionUploadTask *uploadTask = [manager uploadTaskWithStreamedRequest:request progress:&progress completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {<br/>
+                        if (error) {<br/>
+                        NSLog(@"Error: %@", error);<br/>
+                        } else {<br/>
+                        NSLog(@"%@ %@", response, responseObject);<br/>
+                        }<br/>
+                        }];<br/>
+                        [uploadTask resume];<br/>
+                        </code>
+                    </div>
+            </div>
+            <dl name="1224" id="1224" class="dlTit"><li>Creating a Data Task</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];<br/>
+                    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];<br/>
+                    
+                    NSURL *URL = [NSURL URLWithString:@"http://example.com/upload"];<br/>
+                    NSURLRequest *request = [NSURLRequest requestWithURL:URL];<br/>
+                    
+                    NSURLSessionDataTask *dataTask = [manager dataTaskWithRequest:request completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {<br/>
+                    if (error) {<br/>
+                    NSLog(@"Error: %@", error);<br/>
+                    } else {<br/>
+                    NSLog(@"%@ %@", response, responseObject);<br/>
+                    }<br/>
+                    }];<br/>
+                    [dataTask resume];<br/>
+                </code>
+            </div>
+            <dl name="1225" id="1225" class="dlTit"><li>序列化请求</li><dd></dd></dl>
+            <div class="oc-code">
+                <code>
+                    NSString *URLString = @"http://example.com";
+                    NSDictionary *parameters = @{@"foo": @"bar", @"baz": @[@1, @2, @3]};<br/>
+                    
+                    //Query String Parameter Encoding
+                    
+                    ////GET
+                    [[AFHTTPRequestSerializer serializer] requestWithMethod:@"GET" URLString:URLString parameters:parameters error:nil];
+                    
+                    <div class="oc-anno">
+                    <code>
+                        GET http://example.com?foo=bar&baz[]=1&baz[]=2&baz[]=3<br/>
+                     </code>
+                    </div>
+                    
+                    ////POST
+                    [[AFHTTPRequestSerializer serializer] requestWithMethod:@"POST" URLString:URLString parameters:parameters];
+                    <div class="oc-anno">
+                        <code>
+                            POST http://example.com/<br/>
+                            Content-Type: application/json<br/>
+                            <br/>
+                            {"foo": "bar", "baz": [1,2,3]}<br/>
+                            </code>
+                            </div>
+                </code>
+            </div>
+        </article>
+	</section>
+</div>
+<footer>整理by freddon QQ:419102565</footer>
+</body>
+
+</html>
