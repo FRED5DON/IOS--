@@ -111,9 +111,9 @@
     //是否支持拍照
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
     {
-        boSheet=[self callSheet:@[@"拍照",@"从相册选择"]];
+        boSheet=[[UIActionSheet alloc] initWithTitle:@"选择" delegate:self cancelButtonTitle:nil destructiveButtonTitle:@"取消" otherButtonTitles:@"拍照",@"从相册选择", nil];
     }else{
-        boSheet=[self callSheet:@[@"从相册选择"]];
+        boSheet=[[UIActionSheet alloc] initWithTitle:@"选择" delegate:self cancelButtonTitle:nil destructiveButtonTitle:@"取消" otherButtonTitles:@"从相册选择", nil];
     }
     boSheet.tag=_CAMERA_TAG;
     [boSheet dismissWithClickedButtonIndex:0 animated:YES];
@@ -121,20 +121,12 @@
 }
 
 
--(UIActionSheet *)callSheet:(id)titles
-{
-    UIActionSheet *boSheet=[[UIActionSheet alloc] initWithTitle:@"选择" delegate:self cancelButtonTitle:nil destructiveButtonTitle:@"取消" otherButtonTitles:titles, nil];
-    return boSheet;
-}
 
 
 //****UIActionSheet 代理方法
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    int tag=_CAMERA_TAG;
-    int tag2=_DATA_TRANSITION_TAG;
-    int tag3=_ENV_TAG;
-    if (actionSheet.tag==tag) {
+    if (actionSheet.tag==_CAMERA_TAG) {
         //是否支持拍照
         if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
         {
@@ -158,7 +150,7 @@
             
         }
     }
-    else if(actionSheet.tag==tag2)
+    else if(actionSheet.tag==_DATA_TRANSITION_TAG)
     {
         if (buttonIndex==0) {
             return;
@@ -176,7 +168,7 @@
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://3gqq.qq.com/"]];
         }
     }
-    else if(actionSheet.tag==tag3)
+    else if(actionSheet.tag==_ENV_TAG)
     {
         if (buttonIndex==0) {
             return;
@@ -294,7 +286,7 @@
 -(void)wirelessService
 {
     UIActionSheet *boSheet;
-    boSheet=[self callSheet:@[@"电话",@"短信",@"邮件",@"safari"]];
+    boSheet=[[UIActionSheet alloc] initWithTitle:@"选择" delegate:self cancelButtonTitle:nil destructiveButtonTitle:@"取消" otherButtonTitles:@"电话",@"短信",@"邮件",@"safari", nil];
     boSheet.tag=_DATA_TRANSITION_TAG;
     [boSheet dismissWithClickedButtonIndex:0 animated:YES];
     [boSheet showInView:self.view];
@@ -305,7 +297,7 @@
 -(void)envInformation
 {
     UIActionSheet *boSheet;
-    boSheet=[self callSheet:@[@"获取系统时间",@"获取系统版本",@"获取存储空间"]];
+    boSheet=[[UIActionSheet alloc] initWithTitle:@"选择" delegate:self cancelButtonTitle:nil destructiveButtonTitle:@"取消" otherButtonTitles:@"获取系统时间",@"获取系统版本",@"获取存储空间" , nil];
     boSheet.tag=_ENV_TAG;
     [boSheet dismissWithClickedButtonIndex:0 animated:YES];
     [boSheet showInView:self.view];
